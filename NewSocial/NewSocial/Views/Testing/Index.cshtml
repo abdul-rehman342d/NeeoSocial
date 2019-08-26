@@ -1,0 +1,52 @@
+﻿
+@{
+    Layout = null;
+}
+
+<!DOCTYPE html>
+
+<html>
+<head>
+    <meta name="viewport" content="width=device-width" />
+    <title>testing</title>
+</head>
+<body id="app">
+    <div>
+        <input type="file" v-model="tempImg" v-on:change="uploadImage()" />
+    </div>
+
+    <script src="~/Scripts/vue.js"></script>
+    <script src="~/Scripts/axios.js"></script>
+    <script>
+        var root = new Vue
+            ({
+                el: '#app',
+                data:
+                {
+                    isVueActive: 'Al-SHAFQAT',
+                    tempImg: '',
+                },
+                created: function () {
+                   
+                },
+                methods:
+                {
+                    uploadImage() {
+                        var vm = this;
+                        alert(this.tempImg);
+                        axios.post('/Image/saveImage',
+                                {
+                                    img: vm.tempImg,
+                                })
+                                .then(function (res) {
+                                })
+                                .then(function (error) {
+                                    console.log(error);
+                                })
+                    },
+                },
+            });
+    </script>
+
+</body>
+</html>

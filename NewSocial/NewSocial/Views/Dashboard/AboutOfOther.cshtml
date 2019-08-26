@@ -1,0 +1,654 @@
+﻿@{
+    Layout = null;
+}
+@{
+    /**/
+
+
+    if (Session["ApplicationUser"] == null)
+    {
+        <script>
+            window.location = "/Authentication";
+        </script>
+
+    }
+}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta http-equiv="content-type" content="text/html; charset=utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="description" content="Welcome to Neeo Social" />
+    <meta name="keywords" content="Social Network, Social Media,Neeo Social,Make Friends, Newsfeed, Profile Page" />
+    <meta name="robots" content="index, follow" />
+    <title>Neoo Social</title>
+
+    <!-- Stylesheets
+    ================================================= -->
+    <link rel="stylesheet" href="~/content/bootstrap.min.css" />
+    <link rel="stylesheet" href="~/content/style.css" />
+    <link rel="stylesheet" href="~/content/ionicons.min.css" />
+    <link rel="stylesheet" href="~/content/font-awesome.min.css" />
+    <link href="~/content/emoji.css" rel="stylesheet">
+    <link href="~/content/toastr.css" rel="stylesheet" />
+
+    <!--Google Font-->
+    <link href="https://fonts.googleapis.com/css?family=Lato:300,400,400i,700,700i" rel="stylesheet">
+
+    <!--Favicon-->
+    <link rel="shortcut icon" type="image/png" href="~/images/fav.png" />
+    <style>
+        /* Spinner */
+        .spinner {
+            width: 50px;
+            height: 50px;
+            display: inline-block;
+            padding: 0px;
+            border-radius: 100%;
+            border: 6px solid;
+            border-top-color: #005a9c;
+            border-bottom-color: #005a9c;
+            border-left-color: rgba(0, 90, 156, 0.15);
+            border-right-color: rgba(0, 90, 156, 0.15);
+            -webkit-animation: spinner 0.8s ease-in-out infinite alternate;
+            animation: spinner 0.8s ease-in-out infinite alternate;
+        }
+
+        @@keyframes spinner {
+            from {
+                -webkit-transform: rotate(0deg);
+                transform: rotate(0deg);
+            }
+
+            to {
+                -webkit-transform: rotate(360deg);
+                transform: rotate(360deg);
+            }
+        }
+
+        @@-webkit-keyframes spinner {
+            from {
+                -webkit-transform: rotate(0deg);
+            }
+
+            to {
+                -webkit-transform: rotate(360deg);
+            }
+        }
+
+        body .sidebar.sidebar-left .sidebar-content .main-menu .nav.metismenu > .nav-dropdown.active > .nav-sub {
+            background: linear-gradient(180deg,#736cc7 25%,#736cc7 50%,#736cc7 75%,#736cc7 100%) left bottom no-repeat #161931;
+            background-size: 3px 100%;
+        }
+    </style>
+
+</head>
+<body id="app">
+
+    <!-- Header
+    ================================================= -->
+    <header id="header">
+        <nav class="navbar navbar-default navbar-fixed-top menu">
+            <div class="container">
+
+                <!-- Brand and toggle get grouped for better mobile display -->
+                <div class="navbar-header">
+                    <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#bs-example-navbar-collapse-1" aria-expanded="false">
+                        <span class="sr-only">Toggle navigation</span>
+                        <span class="icon-bar"></span>
+                        <span class="icon-bar"></span>
+                        <span class="icon-bar"></span>
+                    </button>
+                    <a class="navbar-brand" href="/Dashboard/home"><img src="~/images/logoNeeo.png" alt="logo" /></a>
+                </div>
+
+                <!-- Collect the nav links, forms, and other content for toggling -->
+                <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
+                    <ul class="nav navbar-nav navbar-right main-menu">
+                        <li class="dropdown"><a href="/Dashboard/home">Home</a></li>
+                        <li class="dropdown"><a href="/Dashboard/profile">Profile</a></li>
+                        <li class="dropdown"><a href="/Dashboard/FriendRequests">Friend Requests</a></li>
+                        @*<li class="dropdown"><a href="#">Messages</a></li>
+                        <li class="dropdown"><a href="#">Notification</a></li>*@
+                        <li class="dropdown"><a href=""  v-on:click="logout()">Logout</a></li>
+                    </ul>
+                    <form class="navbar-form navbar-right hidden-sm">
+                        <div class="form-group">
+                            <i class="icon ion-android-search"></i>
+                            <input type="text" class="form-control" placeholder="Search friends, photos, videos">
+                        </div>
+                    </form>
+                </div><!-- /.navbar-collapse -->
+            </div><!-- /.container -->
+        </nav>
+    </header>
+    <!--Header End-->
+
+    <div class="container">
+
+        <!-- Timeline
+        ================================================= -->
+        <div class="timeline">
+            <div class="timeline-cover" style="background-image: url('../../images/NeeoSocialBackGround.png')">
+
+                <!--Timeline Menu for Large Screens-->
+                <div class="timeline-nav-bar hidden-sm hidden-xs">
+                    <div class="row">
+                        <div class="col-md-3">
+                            <div class="profile-info">
+                                <img v-bind:src="userProfile" alt="" class="img-responsive profile-photo" />
+                                <h3>{{User.name}}</h3>
+                            </div>
+                        </div>
+                        <div class="col-md-9">
+                            <ul class="list-inline profile-menu">
+                                <li><a href="~/Dashboard/otherUser">Timeline</a></li>
+                                <li><a href="~/Dashboard/AboutOfOther" class="active">About</a></li>
+                                @*<li><a>Album</a></li>*@
+                                <li><a href="~/Dashboard/FriendOfOtherUser" >Friends</a></li>
+                            </ul>
+                            <ul class="follow-me list-inline">
+                                <li>{{totalFollowers}}-people following</li>
+                                <li>
+                                    <button class="btn-primary" v-show="addbtn" v-on:click="addFriend()">Add Friend</button>
+                                    <button class="btn-primary" v-show="confirmbtn" v-on:click="confirmFriend()">Confirm</button>
+                                    <button class="btn btn-danger" v-show="rejectbtn" v-on:click="rejectRequest()">Reject</button>
+                                    <button class="btn btn-danger" v-show="cancelReq" v-on:click="cancelSentRequest()">Cancel Request</button>
+                                    <button class="btn btn-success" v-show="reqSentBtn" disabled>Request Sent</button>
+                                </li>
+                            </ul>
+                        </div>
+                    </div>
+                </div><!--Timeline Menu for Large Screens End-->
+                <!--Timeline Menu for Small Screens-->
+                <div class="navbar-mobile hidden-lg hidden-md">
+                    <div class="profile-info">
+                        <img v-bind:src="userProfile" alt="" class="img-responsive profile-photo" />
+                        <h4>{{User.name}}</h4>
+
+                    </div>
+                    <div class="mobile-menu">
+                        <ul class="list-inline profile-menu">
+                                <li><a href="~/Dashboard/otherUser">Timeline</a></li>
+                                <li><a href="~/Dashboard/AboutOfOther" class="active">About</a></li>
+                                @*<li><a>Album</a></li>*@
+                                <li><a href="~/Dashboard/FriendOfOtherUser">Friends</a></li>
+                        </ul>
+                        <button class="btn-primary" v-show="addbtn" v-on:click="addFriend()">Add Friend</button>
+                        <button class="btn-primary" v-show="confirmbtn" v-on:click="confirmFriend()">Confirm</button>
+                        <button class="btn-primary" v-show="rejectbtn" v-on:click="rejectRequest()">Reject</button>
+                        <button class="btn btn-danger" v-show="cancelReq" v-on:click="cancelSentRequest()">Cancel Request</button>
+                        <button class="btn btn-success" v-show="reqSentBtn" disabled>Request Sent</button>
+                    </div>
+                </div><!--Timeline Menu for Small Screens End-->
+
+            </div>
+            <div id="page-contents">
+                <div class="row">
+                    <div class="col-md-3"></div>
+                    <div class="col-md-7">
+
+                        <!-- About
+            ================================================= -->
+                        <div class="about-profile">
+                            <div class="about-content-block">
+                                <h4 class="grey"><i class="ion-ios-information-outline icon-in-title"></i>Personal Information</h4>
+                                <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur</p>
+                            </div>
+                            <div class="about-content-block">
+                                <h4 class="grey"><i class="ion-ios-briefcase-outline icon-in-title"></i>Work Experiences</h4>
+                                <div class="organization">
+                                    <img src="images/envato.png" alt="" class="pull-left img-org" />
+                                    <div class="work-info">
+                                        <h5>Envato</h5>
+                                        <p>Seller - <span class="text-grey">1 February 2013 to present</span></p>
+                                    </div>
+                                </div>
+                                <div class="organization">
+                                    <img src="images/envato.png" alt="" class="pull-left img-org" />
+                                    <div class="work-info">
+                                        <h5>Envato</h5>
+                                        <p>Seller - <span class="text-grey">1 February 2013 to present</span></p>
+                                    </div>
+                                </div>
+                                <div class="organization">
+                                    <img src="images/envato.png" alt="" class="pull-left img-org" />
+                                    <div class="work-info">
+                                        <h5>Envato</h5>
+                                        <p>Seller - <span class="text-grey">1 February 2013 to present</span></p>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="about-content-block">
+                                <h4 class="grey"><i class="ion-ios-location-outline icon-in-title"></i>Location</h4>
+                                <p>228 Park Eve, New York</p>
+                                <div class="google-maps">
+                                    <div id="map" class="map"></div>
+                                </div>
+                            </div>
+                            <div class="about-content-block">
+                                <h4 class="grey"><i class="ion-ios-heart-outline icon-in-title"></i>Interests</h4>
+                                <ul class="interests list-inline">
+                                    <li><span class="int-icons" title="Bycycle riding"><i class="icon ion-android-bicycle"></i></span></li>
+                                    <li><span class="int-icons" title="Photography"><i class="icon ion-ios-camera"></i></span></li>
+                                    <li><span class="int-icons" title="Shopping"><i class="icon ion-android-cart"></i></span></li>
+                                    <li><span class="int-icons" title="Traveling"><i class="icon ion-android-plane"></i></span></li>
+                                    <li><span class="int-icons" title="Eating"><i class="icon ion-android-restaurant"></i></span></li>
+                                </ul>
+                            </div>
+                            <div class="about-content-block">
+                                <h4 class="grey"><i class="ion-ios-chatbubble-outline icon-in-title"></i>Language</h4>
+                                <ul>
+                                    <li><a href="">Russian</a></li>
+                                    <li><a href="">English</a></li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Footer
+    ================================================= -->
+    <footer id="footer">
+        <div class="container">
+            <div class="row">
+                <div class="footer-wrapper">
+                    <div class="col-md-3 col-sm-3">
+                        <a><img src="/images/logoNeeo.png" alt="" class="footer-logo" /></a>
+                        <ul class="list-inline social-icons">
+                            <li><a href="#"><i class="icon ion-social-facebook"></i></a></li>
+                            <li><a href="#"><i class="icon ion-social-twitter"></i></a></li>
+                            <li><a href="#"><i class="icon ion-social-googleplus"></i></a></li>
+                            <li><a href="#"><i class="icon ion-social-pinterest"></i></a></li>
+                            <li><a href="#"><i class="icon ion-social-linkedin"></i></a></li>
+                        </ul>
+                    </div>
+                    <div class="col-md-2 col-sm-2">
+                        <h5>For individuals</h5>
+                        <ul class="footer-links">
+                            <li><a href="">Signup</a></li>
+                            <li><a href="">login</a></li>
+                            <li><a href="">Explore</a></li>
+                            <li><a href="">Finder app</a></li>
+                            <li><a href="">Features</a></li>
+                            <li><a href="">Language settings</a></li>
+                        </ul>
+                    </div>
+                    <div class="col-md-2 col-sm-2">
+                        <h5>For businesses</h5>
+                        <ul class="footer-links">
+                            <li><a href="">Business signup</a></li>
+                            <li><a href="">Business login</a></li>
+                            <li><a href="">Benefits</a></li>
+                            <li><a href="">Resources</a></li>
+                            <li><a href="">Advertise</a></li>
+                            <li><a href="">Setup</a></li>
+                        </ul>
+                    </div>
+                    <div class="col-md-2 col-sm-2">
+                        <h5>About</h5>
+                        <ul class="footer-links">
+                            <li><a href="">About us</a></li>
+                            <li><a href="">Contact us</a></li>
+                            <li><a href="">Privacy Policy</a></li>
+                            <li><a href="">Terms</a></li>
+                            <li><a href="">Help</a></li>
+                        </ul>
+                    </div>
+                    @*<div class="col-md-3 col-sm-3">
+                            <h5>Contact Us</h5>
+                            <ul class="contact">
+                                <li><i class="icon ion-ios-telephone-outline"></i>+1 (234) 222 0754</li>
+                                <li><i class="icon ion-ios-email-outline"></i>info@thunder-team.com</li>
+                                <li><i class="icon ion-ios-location-outline"></i>228 Park Ave S NY, USA</li>
+                            </ul>
+                        </div>*@
+                </div>
+            </div>
+        </div>
+        <div class="copyright">
+            <p>Neeo Team © 2019. All rights reserved</p>
+        </div>
+    </footer>
+
+    <!--preloader-->
+    <div id="spinner-wrapper">
+        <div class="spinner"></div>
+    </div>
+
+    <!-- Scripts
+    ================================================= -->
+    <script src="~/Scripts/jquery-3.1.1.min.js"></script>
+    <script src="~/Scripts/bootstrap.min.js"></script>
+    <script src="~/Scripts/jquery.sticky-kit.min.js"></script>
+    <script src="~/Scripts/jquery.scrollbar.min.js"></script>
+    <script src="~/Scripts/script.js"></script>
+    <script src="~/Scripts/jquery.blockUI.js"></script>
+    <script src="~/Scripts/vue.js"></script>
+    <script src="~/Scripts/axios.js"></script>
+    <script src="~/Scripts/toastr.min.js"></script>
+    <script>
+
+        function blockUI() {
+            $.blockUI({
+                css: {
+                    backgroundColor: 'transparent',
+                    border: 'none'
+                },
+                message: '<div class="spinner"></div>',
+                baseZ: 1500,
+                overlayCSS: {
+                    backgroundColor: '#FFFFFF',
+                    opacity: 0.7,
+                    cursor: 'wait'
+                }
+            });
+            $('.blockUI.blockMsg').center();
+        }
+        //end Blockui
+
+        //Center the element
+        $.fn.center = function () {
+            this.css("position", "absolute");
+            this.css("top", ($(window).height() - this.height()) / 2 + $(window).scrollTop() + "px");
+            this.css("left", ($(window).width() - this.width()) / 2 + $(window).scrollLeft() + "px");
+            return this;
+        }
+
+        function startReq(sender, args) {
+            this.blockUI();
+        }
+        function endReq(sender, args) {
+            $.unblockUI();
+        }
+    </script>
+    <script>
+        var root = new Vue
+            ({
+                el: '#app',
+                data:
+                {
+                    isVueActive: 'Al-SHAFQAT',
+                    defaultProfile: '../images/userProfile.png',
+                    userProfile: '../images/userProfile.png',
+                    tempImag: '',
+                    friendProfile: '../images/userProfile.png',
+                    totalFollowers: 0,
+                    addbtn: false,
+                    reqSentBtn: false,
+                    cancelReq: false,
+                    confirmbtn: false,
+                    rejectbtn: false,
+                    User:
+                    {
+                        UserID: "",
+                        name: "",
+                        email: "",
+                    },
+                    friendList: [],
+                },
+                created: function () {
+                    this.UserDeatile();
+                },
+                methods:
+                {
+                    UserDeatile() {
+                        var vm = this;
+                        startReq();
+                            axios.post('/User/UserDeatileForOther')
+                                .then(function (res) {
+                                    endReq()
+                                    if (res.data["code"] == 200 && res.data["Message"] == "User Detail available")
+                                    {
+                                        vm.User = res.data["currentUser"];
+                                        vm.tempImag = res.data["currentUserProfile"];
+                                        vm.checkRequestStatus();
+                                        vm.currentUserFriendList();
+                                            if (vm.tempImag != null || vm.tempImag != "") {
+                                                vm.userProfile = "../.." + vm.tempImag.ImageUrl;
+                                                 vm.totalFollowers=res.data["totalFollowers"];
+                                            }
+
+                                    }
+                                    if (res.data["code"] == 400 && res.data["Message"] == "Error") {
+                                        window.location = "/Authentication";
+                                    }
+                                    if (res.data["code"] == 401 && res.data["Message"] == "Login First") {
+                                        window.location = "/Authentication";
+                                    }
+
+                                })
+                                .then(function (error) {
+                                    console.log(error);
+                                })
+
+
+                    },
+                    currentUserFriendList() {
+                        var vm = this;
+                        startReq();
+                        axios.post('/Friend/selectedUserFriendList',
+                            {
+                                FriendID: vm.User.UserID,
+                            })
+                            .then(function (res) {
+                                endReq();
+                                if (res.data["code"] == 200 && res.data["Message"] == "success") {
+                                    vm.friendList = res.data["friendList"];
+                                }
+                                if (res.data["code"] == 401 && res.data["Message"] == "Login First") {
+                                    window.location = "/Authentication";
+                                }
+                            })
+                            .then(function (error) {
+                                console.log(error);
+                            })
+
+                    },
+                    viewUser(user_id) {
+                        var vm = this;
+                        axios.post('/User/viewUser',
+                            {
+                                UserID: user_id,
+                            })
+                            .then(function (res) {
+                                if (res.data["code"] == 200 && res.data["Message"] == "Same User") {
+                                    window.location = "/Dashboard/profile";
+                                }
+                                if (res.data["code"] == 200 && res.data["Message"] == "User Set") {
+                                    window.location = "/Dashboard/otherUser";
+                                }
+                                if (res.data["code"] == 400 && res.data["Message"] == "login First") {
+                                    window.location = "/Authentication";
+                                }
+                            })
+                            .then(function (error) {
+                                console.log(error);
+                            })
+                    },
+                    addFriend() {
+
+                        var vm = this;
+                        startReq();
+                        axios.post('/Friend/addFriend',
+                            {
+                                FriendID: vm.User.UserID,
+                            })
+                            .then(function (res) {
+                                if (res.data["code"] == 200 && res.data["Message"] == "Request sent") {
+                                    vm.addbtn = false;
+                                    vm.reqSentBtn = true;
+                                    vm.cancelReq = true;
+                                }
+                                if (res.data["code"] == 200 && res.data["Message"] == "Request Already Sent") {
+                                    vm.addbtn = true;
+                                    vm.reqSentBtn = false;
+                                    vm.cancelReq = false;
+                                }
+                                if (res.data["code"] == 401 && res.data["Message"] == "login First") {
+                                    window.location = "/Authentication";
+                                }
+                                endReq()
+                            })
+                            .then(function (error) {
+                                console.log(error);
+                            })
+
+                    },
+                    confirmFriend() {
+
+                        var vm = this;
+                        startReq();
+                        axios.post('/Friend/confirmFriend',
+                            {
+                                FriendID: vm.User.UserID,
+                            })
+                            .then(function (res) {
+                                if (res.data["code"] == 200 && res.data["Message"] == "Friend added") {
+                                    vm.addbtn = false;
+                                    vm.reqSentBtn = false;
+                                    vm.cancelReq = false;
+                                    vm.confirmbtn = false;
+                                    vm.rejectbtn = false;
+                                }
+                                if (res.data["code"] == 401 && res.data["Message"] == "Unautherized Changing") {
+                                    alert("Unautherized Changing");
+                                }
+                                if (res.data["code"] == 401 && res.data["Message"] == "login First") {
+                                    window.location = "/Authentication";
+                                }
+                                endReq()
+                            })
+                            .then(function (error) {
+                                console.log(error);
+                            })
+
+                    },
+                    cancelSentRequest() {
+                        startReq();
+                        var vm = this;
+                        axios.post('/Friend/cancelSentRequest',
+                            {
+                                FriendID: vm.User.UserID,
+                            })
+                            .then(function (res) {
+                                if (res.data["code"] == 200 && res.data["Message"] == "Request Cancelled") {
+                                    vm.addbtn = true;
+                                    vm.reqSentBtn = false;
+                                    vm.cancelReq = false;
+                                    vm.confirmbtn = false;
+                                    vm.rejectbtn = false;
+                                }
+                                if (res.data["code"] == 200 && res.data["Message"] == "Unautherized Changing") {
+                                    alert("Unautherized Changing");
+                                }
+                                if (res.data["code"] == 401 && res.data["Message"] == "login First") {
+                                    window.location = "/Authentication";
+                                }
+                                endReq()
+                            })
+                            .then(function (error) {
+                                console.log(error);
+                            })
+
+                    },
+                    rejectRequest() {
+                        startReq();
+                        var vm = this;
+                        axios.post('/Friend/rejectRequest',
+                            {
+                                FriendID: vm.User.UserID,
+                            })
+                            .then(function (res) {
+                                if (res.data["code"] == 200 && res.data["Message"] == "Request Rejected") {
+                                    vm.addbtn = true;
+                                    vm.reqSentBtn = false;
+                                    vm.cancelReq = false;
+                                    vm.confirmbtn = false;
+                                    vm.rejectbtn = false;
+                                }
+                                if (res.data["code"] == 200 && res.data["Message"] == "Unautherized Changing") {
+                                    alert("Unautherized Changing");
+                                }
+                                if (res.data["code"] == 401 && res.data["Message"] == "login First") {
+                                    window.location = "/Authentication";
+                                }
+                                endReq()
+                            })
+                            .then(function (error) {
+                                console.log(error);
+                            })
+
+                    },
+                    checkRequestStatus() {
+                        startReq();
+                        var vm = this;
+                        axios.post('/Friend/checkRequestStatus',
+                            {
+                                FriendID: vm.User.UserID
+                            })
+                            .then(function (res) {
+                                if (res.data["code"] == 200 && res.data["Message"] == "Request Already Sent") {
+                                    vm.addbtn = false;
+                                    vm.reqSentBtn = true;
+                                    vm.cancelReq = true;
+                                    vm.confirmbtn = false;
+                                    vm.rejectbtn = false;
+                                }
+                                if (res.data["code"] == 200 && res.data["Message"] == "Add friend") {
+                                    vm.addbtn = true;
+                                    vm.reqSentBtn = false;
+                                    vm.cancelReq = false;
+                                    vm.confirmbtn = false;
+                                    vm.rejectbtn = false;
+                                }
+                                if (res.data["code"] == 200 && res.data["Message"] == "Request Available") {
+                                    vm.addbtn = false;
+                                    vm.reqSentBtn = false;
+                                    vm.cancelReq = false;
+                                    vm.confirmbtn = true;
+                                    vm.rejectbtn = true;
+                                }
+                                if (res.data["code"] == 200 && res.data["Message"] == "Already Friend") {
+                                    vm.addbtn = false;
+                                    vm.reqSentBtn = false;
+                                    vm.cancelReq = false;
+                                    vm.confirmbtn = false;
+                                    vm.rejectbtn = false;
+                                }
+                                if (res.data["code"] == 401 && res.data["Message"] == "login First") {
+                                    window.location = "/Authentication";
+                                }
+                                endReq()
+                            })
+                            .then(function (error) {
+                                console.log(error);
+                            })
+
+                    },
+                    logout() {
+                        axios.post('/Authentication/logout')
+                            .then(function (res) {
+                                if (res.data["code"] == 200 && res.data["Message"] == "Successfully logged out") {
+                                    toastr.success("Succefully Logged in", "Success!");
+                                    window.location = "/Authentication";
+                                }
+                                if (res.data["code"] == 400 && res.data["Message"] == "Login First") {
+                                    toastr.error("Login First", "Error!");
+                                    window.location = "/Authentication";
+                                }
+                            })
+                            .then(function (error) {
+                                console.log(error);
+                            })
+
+                    },
+                },
+            });
+    </script>
+
+</body>
+</html>

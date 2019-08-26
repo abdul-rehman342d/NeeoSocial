@@ -1,0 +1,753 @@
+﻿@{
+    Layout = null;
+}
+@{
+    /**/
+
+
+    if (Session["ApplicationUser"] == null)
+    {
+        <script>
+            window.location = "/Authentication";
+        </script>
+
+    }
+}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta http-equiv="content-type" content="text/html; charset=utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="description" content="Welcome to Neeo Social" />
+    <meta name="keywords" content="Social Network, Social Media,Neeo Social,Make Friends, Newsfeed, Profile Page" />
+    <meta name="robots" content="index, follow" />
+    <title>Neoo Social</title>
+
+    <!-- Stylesheets
+    ================================================= -->
+    <link rel="stylesheet" href="~/content/bootstrap.min.css" />
+    <link rel="stylesheet" href="~/content/style.css" />
+    <link rel="stylesheet" href="~/content/ionicons.min.css" />
+    <link rel="stylesheet" href="~/content/font-awesome.min.css" />
+    <link href="~/content/emoji.css" rel="stylesheet">
+    <link href="~/content/toastr.css" rel="stylesheet" />
+    <link rel="stylesheet" href="https://www.w3schools.com/w3css/4/w3.css">
+
+    <!--Google Font-->
+    <link href="https://fonts.googleapis.com/css?family=Lato:300,400,400i,700,700i" rel="stylesheet">
+
+    <!--Favicon-->
+    <link rel="shortcut icon" type="image/png" href="~/images/" />
+    <style>
+        /* Spinner */
+        .spinner {
+            width: 50px;
+            height: 50px;
+            display: inline-block;
+            padding: 0px;
+            border-radius: 100%;
+            border: 6px solid;
+            border-top-color: #005a9c;
+            border-bottom-color: #005a9c;
+            border-left-color: rgba(0, 90, 156, 0.15);
+            border-right-color: rgba(0, 90, 156, 0.15);
+            -webkit-animation: spinner 0.8s ease-in-out infinite alternate;
+            animation: spinner 0.8s ease-in-out infinite alternate;
+        }
+
+        @@keyframes spinner {
+            from {
+                -webkit-transform: rotate(0deg);
+                transform: rotate(0deg);
+            }
+
+            to {
+                -webkit-transform: rotate(360deg);
+                transform: rotate(360deg);
+            }
+        }
+
+        @@-webkit-keyframes spinner {
+            from {
+                -webkit-transform: rotate(0deg);
+            }
+
+            to {
+                -webkit-transform: rotate(360deg);
+            }
+        }
+
+        body .sidebar.sidebar-left .sidebar-content .main-menu .nav.metismenu > .nav-dropdown.active > .nav-sub {
+            background: linear-gradient(180deg,#736cc7 25%,#736cc7 50%,#736cc7 75%,#736cc7 100%) left bottom no-repeat #161931;
+            background-size: 3px 100%;
+        }
+    </style>
+
+</head>
+<body id="app">
+
+    <!-- Header
+    ================================================= -->
+    <header id="header">
+        <nav class="navbar navbar-default navbar-fixed-top menu">
+            <div class="container">
+
+                <!-- Brand and toggle get grouped for better mobile display -->
+                <div class="navbar-header">
+                    <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#bs-example-navbar-collapse-1" aria-expanded="false">
+                        <span class="sr-only">Toggle navigation</span>
+                        <span class="icon-bar"></span>
+                        <span class="icon-bar"></span>
+                        <span class="icon-bar"></span>
+                    </button>
+                    <a class="navbar-brand" href="/Dashboard/home"><img src="~/images/logoNeeo.png" alt="logo" /></a>
+                </div>
+
+                <!-- Collect the nav links, forms, and other content for toggling -->
+                <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
+                    <ul class="nav navbar-nav navbar-right main-menu">
+                        <li class="dropdown"><a href="/Dashboard/home">Home</a></li>
+                        <li class="dropdown"><a href="/Dashboard/profile">Profile</a></li>
+                        <li class="dropdown"><a href="/Dashboard/FriendRequests">Friend Requests</a></li>
+                        @*<li class="dropdown"><a href="#">Messages</a></li>
+                        <li class="dropdown"><a href="#">Notification</a></li>*@
+                        <li class="dropdown"><a href=""  v-on:click="logout()">Logout</a></li>
+                    </ul>
+                    <form class="navbar-form navbar-right hidden-sm">
+                        <div class="form-group">
+                            <i class="icon ion-android-search"></i>
+                            <input type="text" class="form-control" placeholder="Search friends, photos, videos">
+                        </div>
+                    </form>
+                </div><!-- /.navbar-collapse -->
+            </div><!-- /.container -->
+        </nav>
+    </header>
+    <!--Header End-->
+
+    <div class="container">
+
+        <!-- Timeline
+        ================================================= -->
+        <div class="timeline">
+            <div class="timeline-cover" style="background-image: url('../../images/NeeoSocialBackGround.png')">
+
+                <!--Timeline Menu for Large Screens-->
+                <div class="timeline-nav-bar hidden-sm hidden-xs">
+                    <div class="row">
+                        <div class="col-md-3">
+                            <div class="profile-info">
+                                <img v-bind:src="userProfile" alt="" class="img-responsive profile-photo" />
+                                <button v-on:click="selectProfileImage()" class="btn btn-success" id="get_file"><i class="fa fa-camera"></i></button>
+                                <button class="btn btn-warning" title="Save Image" v-show="defaultProfile==userProfile" type="button" v-on:click="saveProfile()"><i class="fa fa-save"></i></button>
+                                <input type="file" id="userProfileInput" style="display:none" class="_n _5f0v" title="Choose a Profile Image to upload" accept="image/*, image/heic, image/heif" v-on:change="uploadImage">
+                                <h3>{{User.name}}</h3>
+                            </div>
+                        </div>
+                        <div class="col-md-9">
+                            <ul class="list-inline profile-menu">
+                                <li><a href="~/Dashboard/profile" class="active">Timeline</a></li>
+                                @*<li><a href="~/Dashboard/About" >About</a></li>*@
+                                @*<li><a>Album</a></li>*@
+                                <li><a href="~/Dashboard/Friends">Friends</a></li>
+                            </ul>
+                            <ul class="follow-me list-inline">
+                                <li>{{totalFollowers}}-people following</li>
+                                @*<li><button class="btn-primary">Add Friend</button></li>*@
+                            </ul>
+                        </div>
+                    </div>
+                </div><!--Timeline Menu for Large Screens End-->
+                <!--Timeline Menu for Small Screens-->
+                <div class="navbar-mobile hidden-lg hidden-md">
+                    <div class="profile-info">
+                        <img v-bind:src="userProfile" alt="" class="img-responsive profile-photo" />
+                        <button v-on:click="selectProfileImage()" class="btn btn-success" id="get_file"><i class="fa fa-camera"></i></button>
+                        <button class="btn btn-warning" title="Save Image" v-show="defaultProfile==userProfile" type="button" v-on:click="saveProfile()"><i class="fa fa-save"></i></button>
+                        <input type="file" id="userProfileInput" style="display:none" class="_n _5f0v" title="Choose a Profile Image to upload" accept="image/*, image/heic, image/heif" v-on:change="uploadImage">
+
+                        <h4>{{User.name}}</h4>
+
+                    </div>
+                    <div class="mobile-menu">
+                        <ul class="list-inline profile-menu">
+                            <li><a href="~/Dashboard/profile"  class="active">Timeline</a></li>
+                            @*<li><a href="~/Dashboard/About">About</a></li>*@
+                            @*<li><a>Album</a></li>*@
+                            <li><a href="~/Dashboard/Friends">Friends</a></li>
+                        </ul>
+                    </div>
+                </div><!--Timeline Menu for Small Screens End-->
+
+            </div>
+            <div id="page-contents">
+                <div class="row">
+                    <div class="col-md-3"></div>
+
+                    <div class="col-md-9">
+
+                        <!-- Post Create Box
+                        ================================================= -->
+                        <div class="create-post">
+                            <div class="row">
+                                <div class="col-md-7 col-sm-7">
+                                    <div class="form-group">
+                                        <img v-bind:src="userProfile" alt="" class="profile-photo-md" />
+                                        <textarea name="texts" id="userPostInputText" cols="30" rows="1" class="form-control" placeholder="Write what you wish" maxlength="500" v-model="Post.text"></textarea>
+                                    </div>
+                                </div>
+                                <div class="col-md-5 col-sm-5">
+                                    <div class="tools">
+                                        <ul class="publishing-tools list-inline">
+                                            @*<li><a v-on:click="selectPostText()"><i class="ion-compose"></i></a></li>*@
+                                            <li>
+                                                <a href="#" v-on:click="selectPostImage()" id="get_file"><i class="ion-images"></i></a>
+                                                <input type="file" id="userPostInput" style="display:none" class="_n _5f0v" title="Choose a Profile Image to upload" accept="image/*, image/heic, image/heif" v-on:change="uploadPostImage">
+                                            </li>
+                                            <li>
+                                                <i style="font-size:10px" v-show="Post.image!=''">Image Attached</i>
+                                                <a v-on:click="clearImage()" v-show="Post.image!=''" style=" text-decoration: underline;
+    cursor: pointer;"><i style="color:red;font-size:10px" class="fa fa-times"></i></a>
+                                            </li>
+                                            @*<li><a href="#"><i class="ion-ios-videocam"></i></a></li>
+        <li><a href="#"><i class="ion-map"></i></a></li>*@
+                                        </ul>
+                                        <button class="btn btn-primary pull-right" v-on:click="addPost()" :disabled="Post.text == '' && Post.image == ''">Post</button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div><!-- Post Create Box End-->
+                        <!-- Post Content
+                        ================================================= -->
+                        <table>
+                            <tbody>
+                                <tr>
+                                    <td>
+                                        <div class="post-content" v-for="item in postList">
+
+                                            <div id="drpW3" v-if="item.UserID==User.UserID || User.UserID==1" class="row">
+                                                <div class="col-xs-11 static"></div>
+                                                <div class="dropdown col-xs-1 static">
+
+                                                    <div class="w3-dropdown-hover w3-right">
+                                                        <button class="w3-button w3-black"><i class="fa fa-ellipsis-v"></i></button>
+                                                        <div class="w3-dropdown-content w3-bar-block w3-border" style="right:0">
+                                                            <button v-on:click="deletePost(item.PostID)" class="w3-bar-item w3-button">Delete Post</button>
+                                                        </div>
+                                                    </div>
+
+                                                </div>
+                                            </div>
+
+                                            <img v-if="item.imageURl.length>=10" v-bind:src="item.imageURl" alt="post-image" class="img-responsive post-image" />
+                                            <div class="post-container">
+
+                                                <a href="#"><img v-if="item.userProfile.ImageUrl.length>=10" v-bind:src="item.userProfile.ImageUrl" v-on:click="viewUser(item.UserID)" alt="user" class="profile-photo-md pull-left" /></a>
+                                                <a href="#"><img v-if="item.userProfile==null" src="../images/userProfile.png" v-on:click="viewUser(item.UserID)" alt="user" class="profile-photo-md pull-left" /></a>
+                                                    <div class="post-detail">
+                                                        <div class="user-info">
+                                                            <h5><a href="#" class="profile-link" v-on:click="viewUser(item.UserID)">{{item.userName.name}}</a> @*<span class="following">following</span>*@</h5>
+                                                            <p class="text-muted">{{getTimee(item.postTime)}}  {{getDate(item.postTime)}}</p>
+                                                        </div>
+                                                        <div class="reaction">
+                                                            <div class="w3-dropdown-hover w3-right">
+                                                                <button class="btn text-muted" v-on:click="addReaction(item.PostID, 0)"><i class="icon ion-heart"></i>{{item.disagreeCount}}</button>
+                                                                <div v-for="(ind,disA) in item.disAgree" class="w3-dropdown-content w3-bar-block w3-border" style="right:0">
+                                                                    <a v-on:click="viewUser(disA.userName.UserID)" class="profile-link">{{ind+1}}-{{disA.userName.name}}</a><br />
+
+                                                                </div>
+                                                            </div>
+                                                            <div class="w3-dropdown-hover w3-right">
+                                                                <button class="btn btn-default  text-red" v-on:click="addReaction(item.PostID, 1)"><i class="fa fa-heart"></i>{{item.agreeCount}}</button>
+                                                                <div v-for="(ind,agr) in item.agree" class="w3-dropdown-content w3-bar-block w3-border" style="right:0">
+                                                                    <a v-on:click="viewUser(agr.userName.UserID)" class="profile-link">{{ind+1}}-{{agr.userName.name}}</a><br />
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                        <div class="line-divider"></div>
+                                                        <div class="post-text">
+                                                            <p>{{item.text}}</p>
+                                                        </div>
+                                                        <div class="line-divider"></div>
+                                                        <div class="post-comment" v-for="cm in item.Comments">
+                                                            <a href="#"><img href="" v-on:click="viewUser(cm.userName.UserID)" v-show="cm.userProfile.ImageUrl!=null" v-bind:src="cm.userProfile.ImageUrl" alt="" class="profile-photo-sm" /></a>
+                                                            <a href="#">
+                                                                <img v-on:click="viewUser(cm.userName.UserID)" v-show="cm.userProfile==null" src="../images/userProfile.png" alt="" class="profile-photo-sm" />
+                                                            </a>
+                                                            <p><a href="#" v-on:click="viewUser(cm.userName.UserID)" class="profile-link">{{cm.userName.name}} </a>{{cm.commentText}}</p>
+                                                        </div>
+                                                        <div class="post-comment">
+                                                            <img v-show="userProfile!=null" v-bind:src="userProfile" alt="" class="profile-photo-sm" />
+                                                            <img v-show="userProfile==null" src="../images/userProfile.png" alt="" class="profile-photo-sm" />
+                                                            <input type="text" class="form-control" id="cmntText" placeholder="Post a comment" v-model="commentAccordingToPost[item.PostID]" v-on:keyup.enter="setComment(item.PostID)" maxlength="200">
+                                                            <button class="btn btn-default" style="height:80%;margin-top:5px" v-on:click="setComment(item.PostID)"><i class="fa fa-comments" aria-hidden="true"></i></button>
+                                                        </div>
+                                                    </div>
+                                            </div>
+                                        </div>
+
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td>
+                                        <div class="create-post" v-show="postList.length==0">
+                                            <div class="row">
+                                                <div class="col-md-3 col-sm-3">
+
+                                                </div>
+                                                <div class="col-md-6 col-sm-6">
+                                                    <div class="form-group">
+                                                        <h1>No Post Yet</h1>
+                                                    </div>
+                                                </div>
+                                                <div class="col-md-3 col-sm-3">
+
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </td>
+
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Footer
+    ================================================= -->
+    <footer id="footer">
+        <div class="container">
+            <div class="row">
+                <div class="footer-wrapper">
+                    <div class="col-md-3 col-sm-3">
+                        <a><img src="/images/logoNeeo.png" alt="" class="footer-logo" /></a>
+                        <ul class="list-inline social-icons">
+                            <li><a href="#"><i class="icon ion-social-facebook"></i></a></li>
+                            <li><a href="#"><i class="icon ion-social-twitter"></i></a></li>
+                            <li><a href="#"><i class="icon ion-social-googleplus"></i></a></li>
+                            <li><a href="#"><i class="icon ion-social-pinterest"></i></a></li>
+                            <li><a href="#"><i class="icon ion-social-linkedin"></i></a></li>
+                        </ul>
+                    </div>
+                    <div class="col-md-2 col-sm-2">
+                        <h5>For individuals</h5>
+                        <ul class="footer-links">
+                            <li><a href="">Signup</a></li>
+                            <li><a href="">login</a></li>
+                            <li><a href="">Explore</a></li>
+                            <li><a href="">Finder app</a></li>
+                            <li><a href="">Features</a></li>
+                            <li><a href="">Language settings</a></li>
+                        </ul>
+                    </div>
+                    <div class="col-md-2 col-sm-2">
+                        <h5>For businesses</h5>
+                        <ul class="footer-links">
+                            <li><a href="">Business signup</a></li>
+                            <li><a href="">Business login</a></li>
+                            <li><a href="">Benefits</a></li>
+                            <li><a href="">Resources</a></li>
+                            <li><a href="">Advertise</a></li>
+                            <li><a href="">Setup</a></li>
+                        </ul>
+                    </div>
+                    <div class="col-md-2 col-sm-2">
+                        <h5>About</h5>
+                        <ul class="footer-links">
+                            <li><a href="">About us</a></li>
+                            <li><a href="">Contact us</a></li>
+                            <li><a href="">Privacy Policy</a></li>
+                            <li><a href="">Terms</a></li>
+                            <li><a href="">Help</a></li>
+                        </ul>
+                    </div>
+                    @*<div class="col-md-3 col-sm-3">
+                        <h5>Contact Us</h5>
+                        <ul class="contact">
+                            <li><i class="icon ion-ios-telephone-outline"></i>+1 (234) 222 0754</li>
+                            <li><i class="icon ion-ios-email-outline"></i>info@thunder-team.com</li>
+                            <li><i class="icon ion-ios-location-outline"></i>228 Park Ave S NY, USA</li>
+                        </ul>
+                    </div>*@
+                </div>
+            </div>
+        </div>
+        <div class="copyright">
+            <p>Neeo Team © 2019. All rights reserved</p>
+        </div>
+    </footer>
+
+    <!--preloader-->
+    <div id="spinner-wrapper">
+        <div class="spinner"></div>
+    </div>
+
+    <!-- Scripts
+    ================================================= -->
+    <script src="~/Scripts/jquery-3.1.1.min.js"></script>
+    <script src="~/Scripts/bootstrap.min.js"></script>
+    <script src="~/Scripts/jquery.sticky-kit.min.js"></script>
+    <script src="~/Scripts/jquery.scrollbar.min.js"></script>
+    <script src="~/Scripts/script.js"></script>
+    <script src="~/Scripts/jquery.blockUI.js"></script>
+    <script src="~/Scripts/vue.js"></script>
+    <script src="~/Scripts/axios.js"></script>
+    <script src="~/Scripts/toastr.min.js"></script>
+    <script>
+
+        function blockUI() {
+            $.blockUI({
+                css: {
+                    backgroundColor: 'transparent',
+                    border: 'none'
+                },
+                message: '<div class="spinner"></div>',
+                baseZ: 1500,
+                overlayCSS: {
+                    backgroundColor: '#FFFFFF',
+                    opacity: 0.7,
+                    cursor: 'wait'
+                }
+            });
+            $('.blockUI.blockMsg').center();
+        }
+        //end Blockui
+
+        //Center the element
+        $.fn.center = function () {
+            this.css("position", "absolute");
+            this.css("top", ($(window).height() - this.height()) / 2 + $(window).scrollTop() + "px");
+            this.css("left", ($(window).width() - this.width()) / 2 + $(window).scrollLeft() + "px");
+            return this;
+        }
+
+        function startReq(sender, args) {
+            this.blockUI();
+        }
+        function endReq(sender, args) {
+            $.unblockUI();
+        }
+    </script>
+    <script>
+        var root = new Vue
+            ({
+                el: '#app',
+                data:
+                {
+                    isVueActive: 'Al-SHAFQAT',
+                    defaultProfile: '../images/userProfile.png',
+                    userProfile: '../images/userProfile.png',
+                    currentUserProfile:'../images/userProfile.png',
+                    tempImag: '',
+                    totalFollowers:0,
+                    User:
+                    {
+                        UserID: "",
+                        name: "",
+                        email: "",
+                    },
+                    Post:
+                    {
+                        text: "",
+                        image: "",
+                        video: "",
+                    },
+                    Comment:
+                    {
+                        PostID: 0,
+                        commentText: '',
+                    },
+                    Reaction:
+                    {
+                        PostID: 0,
+                        reactionType: 0,
+                    },
+                    postList: [],
+                    commentAccordingToPost: [],
+                },
+                created: function () {
+                    this.listOfPosts();
+                    this.UserDeatile();
+                },
+                methods:
+                {
+                    selectPostImage() {
+                        document.getElementById('userPostInput').click();
+                    },
+                    uploadPostImage: function (event) {
+                        console.log(event);
+
+                        var image = new Image;
+                        var reader = new FileReader;
+                        reader.onload = (e) => {
+                            this.Post.image = e.target.result;
+                        }
+
+                        reader.readAsDataURL(event.target.files[0]);
+                        console.log(event.target.files[0]);
+                    },
+                    selectProfileImage() {
+                        document.getElementById('userProfileInput').click();
+                    },
+                    uploadImage: function (event) {
+                        console.log(event);
+
+                        var image = new Image;
+                        var reader = new FileReader;
+
+                        reader.onload = (e) => {
+                            this.defaultProfile = e.target.result;
+                            this.userProfile = this.defaultProfile;
+                        }
+
+                        reader.readAsDataURL(event.target.files[0]);
+                        console.log(event.target.files[0]);
+
+
+                    },
+                    saveProfile() {
+                        var vm = this;
+                        axios.post('/Image/SaveProfile',
+                            {
+                                image: vm.userProfile
+                            })
+                            .then(function (res) {
+                                window.location = "/Dashboard/profile";
+                            })
+                            .then(function (error) {
+                                console.log(error);
+                            })
+                    },
+                    UserDeatile() {
+                        var vm = this;
+                        startReq
+                        axios.post('/User/UserDeatile')
+                            .then(function (res) {
+                                if (res.data["code"] == 200 && res.data["Message"] == "User Detail available") {
+                                    vm.User = res.data["currentUser"];
+                                    vm.tempImag = res.data["currentUserProfile"];
+                                    if (vm.tempImag != null)
+                                    {
+                                        vm.userProfile = "../.." + vm.tempImag.ImageUrl;
+                                    }
+                                    if (vm.tempImag == null)
+                                    {
+                                        vm.userProfile = "../images/userProfile.png";
+                                        vm.defaultProfile= "";
+                                    }
+                                    vm.totalFollowers=res.data["totalFollowers"];
+                                }
+                                if (res.data["code"] == 400 && res.data["Message"] == "Login First") {
+                                    window.location = "/Authentication/login";
+                                }
+                                endReq();
+                            })
+                            .then(function (error) {
+                                console.log(error);
+                            })
+
+                    },
+                    clearImage()
+                    {
+                        this.Post.image = "";
+                    },
+                    addPost() {
+                        if (this.Post.text != "" || this.Post.image != "" || this.Post.video != "") {
+                            var vm = this;
+                            axios.post('/Post/addPost',
+                                {
+                                    text: vm.Post.text,
+                                    image: vm.Post.image,
+                                    video: vm.Post.video
+                                })
+                                .then(function (res) {
+                                    vm.clearPost();
+                                    if (res.data["code"] == 200 && res.data["Message"] == "Post Successfully added") {
+                                        vm.listOfPosts();
+                                        toastr.success("Posted", "Success!");
+                                    }
+                                    if (res.data["code"] == 400 && res.data["Message"] == "UnAuthorized Changing") {
+                                        toastr.error("Unauthorized Changing", "Error!");
+                                    }
+                                    if (res.data["code"] == 401 && res.data["Message"] == "login First") {
+                                        window.location = "/Authentication";
+                                    }
+                                })
+                                .then(function (error) {
+                                    console.log(error);
+                                })
+                        }
+                    },
+                    deletePost(currentPostID) {
+                            var vm = this;
+                            startReq();
+                            axios.post('/Post/deletePost',
+                                {
+                                    currentPostID: currentPostID,
+                                })
+                                .then(function (res) {
+                                    endReq();
+                                    if (res.data["code"] == 200 && res.data["Message"] == "Post Deleted") {
+                                        vm.listOfPosts();
+                                        toastr.success("Post Deleted", "Success!");
+                                    }
+                                    if (res.data["code"] == 400 && res.data["Message"] == "UnAuthorized Changing") {
+                                        toastr.error("Unauthorized Changing", "Error!");
+                                    }
+                                    if (res.data["code"] == 401 && res.data["Message"] == "login First") {
+                                        window.location = "/Authentication/login";
+                                    }
+                                })
+                                .then(function (error) {
+                                    console.log(error);
+                                })
+
+                        },
+                    clearPost() {
+                        this.Post.text = "";
+                        this.Post.image = "";
+                        this.Post.video = "";
+                    },
+                    listOfPosts() {
+                        var vm = this;
+                        axios.post('/Post/postListofCurrentUser')
+                            .then(function (res) {
+                                if (res.data["code"] == 200 && res.data["Message"] == "Post List Available") {
+                                    vm.postList = res.data["postList"];
+
+                                }
+                                if (res.data["code"] == 401 && res.data["Message"] == "login First") {
+                                    window.location = "/Authentication";
+                                }
+                            })
+                            .then(function (error) {
+                                console.log(error);
+                            })
+
+                    },
+                    clearComment() {
+                        this.Comment.PostID = 0;
+                        this.Comment.commentText = "";
+                    },
+                    viewUser(user_id) {
+                        var vm = this;
+                        axios.post('/User/viewUser',
+                            {
+                                UserID: user_id,
+                            })
+                            .then(function (res) {
+                                if (res.data["code"] == 200 && res.data["Message"] == "Same User") {
+                                    window.location = "/Dashboard/profile";
+                                }
+                                if (res.data["code"] == 200 && res.data["Message"] == "User Set") {
+                                    window.location = "/Dashboard/otherUser";
+                                }
+                                if (res.data["code"] == 400 && res.data["Message"] == "login First") {
+                                    window.location = "/Authentication";
+                                }
+                            })
+                            .then(function (error) {
+                                console.log(error);
+                            })
+                    },
+                    setComment(PostID) {
+                        this.Comment.PostID = PostID;
+                        this.Comment.commentText = this.commentAccordingToPost[PostID];
+                        this.addComment();
+                    },
+                    addComment() {
+                        if (this.Comment.commentText != "" && this.Comment.commentText.length <=200) {
+                            var vm = this;
+                            axios.post('/Comment/addComment',
+                                {
+                                    PostID: vm.Comment.PostID,
+                                    commentText: vm.Comment.commentText,
+                                })
+                                .then(function (res) {
+                                    if (res.data["code"] == 200 && res.data["Message"] == "comment Successfully added") {
+                                        vm.commentAccordingToPost.splice(vm.Comment.PostID, 1, "")
+                                        vm.clearComment();
+                                        vm.listOfPosts();
+                                    }
+                                   if (res.data["code"] == 400 && res.data["Message"] == "Unauthorized changing") {
+                                        alert("Unauthorized changing");
+                                    }
+                                    if (res.data["code"] == 401 && res.data["Message"] == "login First") {
+                                        window.location = "/Authentication";
+                                    }
+                                })
+                                .then(function (error) {
+                                    console.log(error);
+                                })
+                        }
+
+                    },
+                    addReaction(PostID, reactionType) {
+                        this.Reaction.PostID = PostID;
+                        this.Reaction.UserID = this.User.UserID;
+                        this.Reaction.reactionType = reactionType;
+                        var vm = this;
+                        axios.post('/Reaction/addReaction',
+                            {
+                                currentReaction: vm.Reaction,
+                            })
+                            .then(function (res) {
+                                if (res.data["code"] == 200 && res.data["Message"] == "Reaction Successfully added") {
+                                    vm.listOfPosts();
+                                }
+                                if (res.data["code"] == 400 && res.data["Message"] == "login First") {
+                                    window.location = "/Authentication";
+                                }
+                            })
+                            .then(function (error) {
+                                console.log(error);
+                            })
+
+                    },
+                    getDate: function (value) {
+                        var pattern = /Date\(([^)]+)\)/;
+                        var results = pattern.exec(value);
+                        var dt = new Date(parseFloat(results[1]));
+                        return (dt.getDate().toString().padStart(2, 0) + "-" + (dt.getMonth() + 1).toString().padStart(2, 0) + "-" + dt.getFullYear());
+
+                    },
+                    getTimee: function (value) {
+                        var pattern = /Date\(([^)]+)\)/;
+                        var results = pattern.exec(value);
+                        var dt = new Date(parseFloat(results[1]));
+                        var hr = dt.getHours().toString().padStart(2, 0);
+                        var timetype;
+                        if ((hr >= 12) && 24 << hr) {
+                            timetype = "PM";
+                            hr = hr - 12;
+                        }
+                        else { timetype = "AM" }
+
+                        return (hr + ":" + dt.getMinutes().toString().padStart(2, 0) + "" + timetype);
+                    },
+                    logout() {
+                        axios.post('/Authentication/logout')
+                            .then(function (res) {
+                                if (res.data["code"] == 200 && res.data["Message"] == "Successfully logged out") {
+                                    toastr.success("Succefully Logged in", "Success!");
+                                    window.location = "/Authentication";
+                                }
+                                if (res.data["code"] == 400 && res.data["Message"] == "Login First") {
+                                    toastr.error("Login First", "Error!");
+                                    window.location = "/Authentication";
+                                }
+                            })
+                            .then(function (error) {
+                                console.log(error);
+                            })
+
+                    },
+                },
+            });
+    </script>
+
+</body>
+</html>
